@@ -62,7 +62,12 @@ public class UsuariosController {
 	@GetMapping
 	public ModelAndView pesquisar(UsuarioFilter usuarioFilter) {
 		ModelAndView mv = new ModelAndView("/usuario/PesquisaUsuarios");
-		mv.addObject("usuarios", usuarios.findAll());
+		/*dica: para implementar o filtrar(usuarioFilter) temos que acrescentar esse método no filter, usuariosQueries e UsuariosImpl
+			e também no UsuariosImpl para pegar a sessão usar o Criteria criteria = manager.unwrap(Session.class).createCriteria(Usuario.class),
+			utilizar esse padrão para pegar sessão.
+			Também criar UsuarioGrupo e UsuarioGrupoId em Models
+		*/ 
+		mv.addObject("usuarios", usuarios.filtrar(usuarioFilter));
 		mv.addObject("grupos", grupos.findAll());
 		return mv;
 	}
