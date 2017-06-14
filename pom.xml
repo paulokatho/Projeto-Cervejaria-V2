@@ -276,6 +276,12 @@
 		    <version>${thymeleaf-extras-springsecurity.version}</version>
 		    <scope>compile</scope>
 		</dependency>
+		
+		<!-- Banco de Dados Postgresql para o Heroku -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+		</dependency>
 
 	</dependencies>
 	
