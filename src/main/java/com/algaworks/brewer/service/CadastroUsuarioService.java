@@ -40,5 +40,11 @@ public class CadastroUsuarioService {
 		
 		usuarios.save(usuario);
 	}
+
+	@Transactional // transactional, pois vai fazer alteração nos dados do banco
+	public void alterarStatus(Long[] codigos, StatusUsuario statusUsuario) {
+		//busca os codigos que contenham os códigos vindos como parametros nessa colection de códigos.
+		statusUsuario.executar(codigos, usuarios);
+	}
 	
 }

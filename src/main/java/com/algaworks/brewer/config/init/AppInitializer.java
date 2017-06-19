@@ -4,6 +4,7 @@ import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration.Dynamic;
 
+import org.springframework.web.filter.HttpPutFormContentFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import com.algaworks.brewer.config.JPAConfig;
@@ -42,7 +43,13 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 	}*/
 	@Override
 	protected Filter[] getServletFilters() {
-		return new Filter[] {};
+		/* httpPutFormContentFilter usado na tela de pesquisa de usuarios no checkbox para selecionar varios usuarios e quando clicar no 
+		botão ativar ele passar o array contendo os valores do codigo do usuario. Se não colocar esse carinha dá um erro de 404 que não 
+		permite ser usado o 'PUT'. Aula 21.4 : +~- 17:00 min.
+		---Não pode esquecer de colocar em usuariosController no metodo atualizar status @ResponseStatus(HttpStatus.OK)---
+		*/
+		HttpPutFormContentFilter httpPutFormContentFilter = new HttpPutFormContentFilter();
+		return new Filter[] { httpPutFormContentFilter };
 	}
 	
 	@Override
