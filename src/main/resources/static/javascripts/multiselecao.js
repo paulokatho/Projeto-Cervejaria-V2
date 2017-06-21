@@ -5,15 +5,19 @@ Brewer.MultiSelecao = (function() {
 	function MultiSelecao() {
 		this.statusBtn = $('.js-status-btn');
 		this.selecaoCheckbox = $('.js-selecao');
+		this.selecaoTodosCheckbox = $('.js-selecao-todos');
 	}
 	
 	MultiSelecao.prototype.iniciar = function() {
 		this.statusBtn.on('click', onStatusBtnClicado.bind(this));
+		this.selecaoTodosCheckbox.on('click', onSelecaoTodosClicado.bind(this));
+		this.selecaoCheckbox.on('click', onSelecaoClicado.bind(this));
 	}
 	
 	function onStatusBtnClicado(event) {
 		var botaoClicado = $(event.currentTarget);
 		var status = botaoClicado.data('status');
+		var url = botaoClicado.data('url');
 		
 		var checkBoxSelecionados = this.selecaoCheckbox.filter(':checked');
 		var codigos = $.map(checkBoxSelecionados, function(c) {
@@ -23,7 +27,7 @@ Brewer.MultiSelecao = (function() {
 		//só entra aqui se no usuariosPesquisa for selecionado usuarios no checkbox, se não dá uma bad request
 		if (codigos.length > 0) {
 			$.ajax({
-				url: '/brewer/usuarios/status',
+				url: url,
 				method: 'PUT',
 				data: {
 					codigos: codigos,
@@ -35,6 +39,23 @@ Brewer.MultiSelecao = (function() {
 			});
 			
 		}
+	}
+	
+	function onSelecaoTodosClicado() { //aula 21-5 - 02:35
+		var status = this.selecaoTodosCheckbox.prop('checked');
+		this.selecaoCheckbox.prop('checked', status);
+		statusBotaoAcao.call(this, status);
+	}
+	
+	function onSelecaoClicado() {
+		var selecaoCheckboxChecados = this.selecaoCheckbox.filter(':checked');
+		//console.log('selecaoCheckboxChecados', selecaoCheckboxChecados.length); //para ver quantos checkbox estão selecionados na tela
+		this.selecaoTodosCheckbox.prop('checked', selecaoCheckboxChecados.length >= this.selecaoCheckbox.length);
+		statusBotaoAcao.call(this, selecaoCheckboxChecados.length);
+	}
+	
+	function statusBotaoAcao(ativar) {
+		ativar ? this.statusBtn.removeClass('disabled') : this.statusBtn.addClass('disabled');
 	}
 	
 	return MultiSelecao;
