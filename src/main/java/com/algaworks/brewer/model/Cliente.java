@@ -25,6 +25,7 @@ import org.hibernate.validator.group.GroupSequenceProvider;
 import com.algaworks.brewer.model.validation.ClienteGroupSequenceProvider;
 import com.algaworks.brewer.model.validation.group.CnpjGroup;
 import com.algaworks.brewer.model.validation.group.CpfGroup;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "cliente")
@@ -56,6 +57,7 @@ public class Cliente implements Serializable {
 	@Email(message = "E-mail inválido")
 	private String email;
 
+	@JsonIgnore //Essa anotação está na pesquisa em ClientesController e serve para quando for fazer a pesquisa rapida de cliente o Endereço não inicilize e não carrege, somente cliente, se quiser carregar endereço tem que inicializar no pesquisa endereço em Cidade e talvez Estado
 	@Embedded
 	private Endereco endereco;
 	

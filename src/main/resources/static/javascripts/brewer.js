@@ -96,6 +96,13 @@ Brewer.Security = (function() {
 	
 }());
 
+//função da aula 22-7 aos 29:35 para a pagina de venda de cerveja no autocomplete da página para formatar o que for aparecendo. 
+Brewer.formatarMoeda = function(valor) {
+	//numeral.language('pt-br');
+	numeral.locale('pt-br');
+	return numeral(valor).format('0,0.00');
+}
+
 $(function() {
 	var maskMoney = new Brewer.MaskMoney();
 	maskMoney.enable();
