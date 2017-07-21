@@ -9,6 +9,8 @@ import org.junit.Test;
 
 import com.algaworks.brewer.model.Cerveja;
 
+import session.TabelaItensVenda;
+
 public class TabelaItensVendaTest {
 	
 	private TabelaItensVenda tabelaItensVenda;

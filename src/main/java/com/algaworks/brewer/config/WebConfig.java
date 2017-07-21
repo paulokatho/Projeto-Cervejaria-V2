@@ -45,9 +45,10 @@ import com.github.mxab.thymeleaf.extras.dataattribute.dialect.DataAttributeDiale
 import com.google.common.cache.CacheBuilder;
 
 import nz.net.ultraq.thymeleaf.LayoutDialect;
+import session.TabelaItensVenda;
 
 @Configuration
-@ComponentScan(basePackageClasses = { CervejasController.class })
+@ComponentScan(basePackageClasses = { CervejasController.class, TabelaItensVenda.class })
 @EnableWebMvc
 @EnableSpringDataWebSupport
 @EnableCaching
