@@ -12,6 +12,7 @@ Brewer.TabelaItens = (function() {
 	function TabelaItens(autocomplete) {
 		this.autocomplete = autocomplete;
 		this.tabelaCervejasContainer = $('.js-tabela-cervejas-container');
+		this.uuid = $('#uuid').val();
 	}
 	
 	TabelaItens.prototype.iniciar = function() {
@@ -23,7 +24,8 @@ Brewer.TabelaItens = (function() {
 			url: 'item',
 			method: 'POST',
 			data: {
-				codigoCerveja: item.codigo
+				codigoCerveja: item.codigo,
+				uuid: this.uuid
 			}
 		});
 		
@@ -33,7 +35,10 @@ Brewer.TabelaItens = (function() {
 	//aula 23-8 9:00
 	function onItemAtualizadoNoServidor(html) {
 		this.tabelaCervejasContainer.html(html);
-		$('.js-tabela-cerveja-quantidade-item').on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
+		var quantidadeItemInput = $('.js-tabela-cerveja-quantidade-item');
+		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
+		quantidadeItemInput.maskMoney({ precision: 0, thousands: ''});
+		
 		$('.js-tabela-item').on('dblclick', onDoubleClick);//quando da 2 clicks na tela ele exibe opção de excluir
 		//aula 23-10 10:22
 		$('.js-exclusao-item-btn').on('click', onExclusaoItemClick.bind(this));
@@ -42,13 +47,20 @@ Brewer.TabelaItens = (function() {
 	function onQuantidadeItemAlterado(evento) {
 		var input = $(evento.target);
 		var quantidade = input.val();
+		
+		if (quantidade <= 0) {
+			input.val(1);
+			quantidade = 1;
+		}
+		
 		var codigoCerveja = input.data('codigo-cerveja');
 		
 		var resposta = $.ajax({
 			url: 'item/' + codigoCerveja,
 			method: 'PUT',
 			data: {
-				quantidade: quantidade
+				quantidade: quantidade,
+				uuid: this.uuid
 			}
 		});
 		
@@ -62,7 +74,7 @@ Brewer.TabelaItens = (function() {
 	function onExclusaoItemClick(evento) {
 		var codigoCerveja = $(evento.target).data('codigo-cerveja');//codigo que está no botão de excluir de TabelaItensVenda.html
 		var resposta = $.ajax({
-			url: 'item/' + codigoCerveja,
+			url: 'item/' + this.uuid + '/' + codigoCerveja,
 			method: 'DELETE'
 		});
 		

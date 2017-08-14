@@ -1,13 +1,10 @@
-package session;
+package com.algaworks.brewer.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
-
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 
 import com.algaworks.brewer.model.Cerveja;
 import com.algaworks.brewer.model.ItemVenda;
@@ -21,11 +18,17 @@ import com.algaworks.brewer.model.ItemVenda;
  */
 //antes do eclipse 4.3 tinha que declarar o @Scope como abaixo
 //@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-@SessionScope
-@Component
-public class TabelaItensVenda {
+//@SessionScope
+//@Component
+class TabelaItensVenda { //Essa classe na aula 23-11 08:27 foi tirada de publica para poder ser acessada só por TabelasItensSession
 
-	private List<ItemVenda> itens = new ArrayList<>();
+	private String uuid; //aula 23-11 18:00
+ 	private List<ItemVenda> itens = new ArrayList<>();
+ 	
+ 	public TabelaItensVenda(String uuid) {
+		super();
+		this.uuid = uuid;
+	}
 	
 	//utilizando java 8 para realizar o valorTotal .stream é um tipo de iterador
 	public BigDecimal getValorTotal() {
@@ -77,6 +80,35 @@ public class TabelaItensVenda {
 		return itens.stream()
 				.filter(i -> i.getCerveja().equals(cerveja))
 				.findAny();
+	}
+	
+	public String getUuid() {
+		return uuid;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TabelaItensVenda other = (TabelaItensVenda) obj;
+		if (uuid == null) {
+			if (other.uuid != null)
+				return false;
+		} else if (!uuid.equals(other.uuid))
+			return false;
+		return true;
 	}
 	
 }
