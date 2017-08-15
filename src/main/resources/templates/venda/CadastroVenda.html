@@ -31,11 +31,11 @@
 			
 			<div class="row">
 				<div class="col-sm-4">
-					<div class="aw-box">
+					<div class="aw-box  js-valor-total-box-container">
 						<div class="aw-box__icon">
 							<i class="fa  fa-usd  fa-3x"></i>
 						</div>
-						<div class="aw-box__value">R$0,00</div>
+						<div class="aw-box__value">R$<span class="js-valor-total-box">0,00</span></div>
 						<div class="aw-box__title">Total</div>
 					</div>
 				</div>
@@ -175,6 +175,7 @@
 	<script th:src="@{/javascripts/cliente.pesquisa-rapida.js}"></script>
 	<script th:src="@{/javascripts/venda.autocomplete-itens.js}"></script>
 	<script th:src="@{/javascripts/venda.tabela-itens.js}"></script>
+	<script th:src="@{/javascripts/venda.js}"></script>
 	<script>
 		$(function() {
 			$('.js-abas-venda a').click(function (e) {

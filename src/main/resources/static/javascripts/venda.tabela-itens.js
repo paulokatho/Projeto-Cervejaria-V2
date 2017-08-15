@@ -13,6 +13,8 @@ Brewer.TabelaItens = (function() {
 		this.autocomplete = autocomplete;
 		this.tabelaCervejasContainer = $('.js-tabela-cervejas-container');
 		this.uuid = $('#uuid').val();
+		this.emitter = $({});
+		this.on = this.emitter.on.bind(this.emitter);
 	}
 	
 	TabelaItens.prototype.iniciar = function() {
@@ -39,9 +41,12 @@ Brewer.TabelaItens = (function() {
 		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
 		quantidadeItemInput.maskMoney({ precision: 0, thousands: ''});
 		
-		$('.js-tabela-item').on('dblclick', onDoubleClick);//quando da 2 clicks na tela ele exibe opção de excluir
+		var tabelaItem = $('.js-tabela-item');
+		tabelaItem.on('dblclick', onDoubleClick);//quando da 2 clicks na tela ele exibe opção de excluir
 		//aula 23-10 10:22
 		$('.js-exclusao-item-btn').on('click', onExclusaoItemClick.bind(this));
+		
+		this.emitter.trigger('tabela-itens-atualizada', tabelaItem.data('valor-total')); // para pegar o valor total e colocar na tela de vendas no quadro TOTAL. aula 23:12 06:38
 	}
 	
 	function onQuantidadeItemAlterado(evento) {

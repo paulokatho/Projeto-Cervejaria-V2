@@ -96,11 +96,15 @@ Brewer.Security = (function() {
 	
 }());
 
+numeral.language('pt-br');
 //função da aula 22-7 aos 29:35 para a pagina de venda de cerveja no autocomplete da página para formatar o que for aparecendo. 
 Brewer.formatarMoeda = function(valor) {
-	//numeral.language('pt-br');
-	numeral.locale('pt-br');
+	//numeral.language('pt-br'); //dessa maneira não funcionou corretamente, somente com Locale()
 	return numeral(valor).format('0,0.00');
+}
+
+Brewer.recuperarValor = function(valorFormatado) {
+	return numeral().unformat(valorFormatado);
 }
 
 $(function() {

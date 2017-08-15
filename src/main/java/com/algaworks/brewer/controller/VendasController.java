@@ -64,6 +64,7 @@ public class VendasController {
 	private ModelAndView mvTabelaItensVenda(String uuid) {
 		ModelAndView mv = new ModelAndView("venda/TabelaItensVenda");
 		mv.addObject("itens", tabelaItens.getItens(uuid));
+		mv.addObject("valorTotal", tabelaItens.getValorTotal(uuid));//para capturar o valor total para exibir no quadro da tela de vendas. Aula 23:12 07:30
 		return mv;
 	}
 
