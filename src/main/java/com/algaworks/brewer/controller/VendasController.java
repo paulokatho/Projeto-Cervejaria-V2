@@ -2,18 +2,30 @@ package com.algaworks.brewer.controller;
 
 import java.util.UUID;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.algaworks.brewer.controller.validator.VendaValidator;
 import com.algaworks.brewer.model.Cerveja;
+import com.algaworks.brewer.model.Venda;
 import com.algaworks.brewer.repository.Cervejas;
+import com.algaworks.brewer.security.UsuarioSistema;
+import com.algaworks.brewer.service.CadastroVendaService;
 import com.algaworks.brewer.session.TabelasItensSession;
 
 @Controller
@@ -29,12 +41,43 @@ public class VendasController {
 	
 	@Autowired
 	private TabelasItensSession tabelaItens;
+
+	@Autowired
+	private CadastroVendaService cadastroVendaService;
+	
+	@Autowired
+	private VendaValidator vendaValidator;//aula 23-16 05:57
+	
+	@InitBinder
+	public void inicializarValidador(WebDataBinder binder) {
+		binder.setValidator(vendaValidator);//Inicia o validador que criamos no package validator. Aula 23-16 06:04
+	}
 	
 	@GetMapping("/nova")
-	public ModelAndView nova() {
+	public ModelAndView nova(Venda venda) {
 		ModelAndView mv = new ModelAndView("venda/CadastroVenda");
-		mv.addObject("uuid", UUID.randomUUID().toString()); //gera um id para cada aba que for aberta no browser, para quando estiver logado como mesmo usuario. Aula 23/11 18:00
+		//mv.addObject("uuid", UUID.randomUUID().toString()); //gera um id para cada aba que for aberta no browser, para quando estiver logado como mesmo usuario. Aula 23/11 18:00
+		
+		if(StringUtils.isEmpty(venda.getUuid())) {
+			venda.setUuid(UUID.randomUUID().toString());			
+		}
+		
 		return mv;
+	}
+	
+	@PostMapping("/nova") //aula 23-15 11:00
+	public ModelAndView salvar(@Valid Venda venda, BindingResult result, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) {
+		if(result.hasErrors()) {//A validação pra salvar aqui vai usar o VendaValidator que criamos no pacote validator. Aula 23-16 06:56
+			return nova(venda); //não esquecer de acrescentar no html do cadastroVenda o brewer:message
+		}
+		
+		
+		venda.setUsuario(usuarioSistema.getUsuario());
+		venda.adicionarItens(tabelaItens.getItens(venda.getUuid()));
+		
+		cadastroVendaService.salvar(venda);
+		attributes.addFlashAttribute("mensagem", "Venda salva com sucesso");
+		return new ModelAndView("redirect:/vendas/nova");
 	}
 
 	@PostMapping("/item")

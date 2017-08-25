@@ -30,7 +30,7 @@ Brewer.PesquisaRapidaCliente = (function() {
 			contentType: 'application/json',
 			data: {
 				nome: this.nomeInput.val()
-			},
+			}, 
 			success: onPesquisaConcluida.bind(this),
 			error: onErroPesquisa.bind(this)
 		});
@@ -62,28 +62,28 @@ Brewer.PesquisaRapidaCliente = (function() {
 }());
 
 	/*Criando uma nova classe para pegar o id do cara que for selecionado no pesquisa rápida de cliente*/
-	Brewer.TabelaClientePesquisaRapida = (function() {
+Brewer.TabelaClientePesquisaRapida = (function() {
+	
+	function TabelaClientePesquisaRapida(modal) {
+		this.modalCliente = modal;
+		this.cliente = $('.js-cliente-pesquisa-rapida');
+	}
+	
+	TabelaClientePesquisaRapida.prototype.iniciar = function() {
+		this.cliente.on('click', onClienteSelecionado.bind(this));
+	}
+	
+	function onClienteSelecionado(evento) {
+		this.modalCliente.modal('hide');
 		
-		function TabelaClientePesquisaRapida(modal) {
-			this.modalCliente = modal;
-			this.cliente = $('.js-cliente-pesquisa-rapida');
-		}
-		
-		TabelaClientePesquisaRapida.prototype.iniciar = function() {
-			this.cliente.on('click', onClienteSelecionado.bind(this));
-		}
-		
-		function onClienteSelecionado(evento) {
-			this.modalCliente.modal('hide');
-			
-			var clienteSelecionado = $(evento.currentTarget);
-			$('#nomeCliente').val(clienteSelecionado.data('nome'));
-			$('#codigoCliente').val(clienteSelecionado.data('codigo'));
-		}
-		
-		return TabelaClientePesquisaRapida;
-		
-	}());
+		var clienteSelecionado = $(evento.currentTarget);
+		$('#nomeCliente').val(clienteSelecionado.data('nome'));
+		$('#codigoCliente').val(clienteSelecionado.data('codigo'));
+	}
+	
+	return TabelaClientePesquisaRapida;
+	
+}());
 
 $(function() {
 	var pesquisaRapidaCliente = new Brewer.PesquisaRapidaCliente();

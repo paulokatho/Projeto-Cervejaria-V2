@@ -1,12 +1,14 @@
 package com.algaworks.brewer.session;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
 import com.algaworks.brewer.model.Cerveja;
+import com.algaworks.brewer.model.ItemVenda;
 
 @SessionScope
 @Component
@@ -35,7 +37,7 @@ public class TabelasItensSession {
 		
 	}
 
-	public Object getItens(String uuid) {
+	public List<ItemVenda> getItens(String uuid) {
 		return buscarTabelaPorUuid(uuid).getItens();
 	}
 
