@@ -1,5 +1,7 @@
 package com.algaworks.brewer.controller.validator;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -29,10 +31,27 @@ public class VendaValidator implements Validator{
 		ValidationUtils.rejectIfEmpty(errors, "cliente.codigo","", "Selecione um cliente na pesquisa rápida");		
 		
 		Venda venda = (Venda) target;
+		validarSeInformouApenasHorarioEntrega(errors, venda);
+		validarSeInformouItens(errors, venda);
+		validarValorTotalNegativo(errors, venda);//aula 23-16 28:08
+	}
+
+	private void validarValorTotalNegativo(Errors errors, Venda venda) {
+		if (venda.getValorTotal().compareTo(BigDecimal.ZERO) < 0) {
+			errors.reject("", "Valor total não pode ser negativo");
+		}
+	}
+
+	private void validarSeInformouItens(Errors errors, Venda venda) {
+		if(venda.getItens().isEmpty()) {
+			errors.reject("", "Adicione pelo menos uma cerveja na venda");
+		}
+	}
+
+	private void validarSeInformouApenasHorarioEntrega(Errors errors, Venda venda) {
 		if (venda.getHorarioEntrega() != null && venda.getDataEntrega() == null) {
 			errors.rejectValue("dataEntrega", "", "Informe uma data da entrega pra um horario");
 		}
-		
 	}
 
 	

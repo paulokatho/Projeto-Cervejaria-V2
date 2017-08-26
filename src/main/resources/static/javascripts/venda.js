@@ -7,9 +7,9 @@ Brewer.Venda = (function() {
 		this.valorDescontoInput = $('#valorDesconto');
 		this.valorTotalBoxContainer = $('.js-valor-total-box-container');
 		
-		this.valorTotalItens = 0;
-		this.valorFrete = 0;
-		this.valorDesconto = 0;
+		this.valorTotalItens = this.tabelaItens.valorTotal();
+		this.valorFrete = this.valorFreteInput.data('valor');//aula 23-16 35:53
+		this.valorDesconto = this.valorDescontoInput.data('valor');
 	}
 	
 	Venda.prototype.iniciar = function() {
@@ -20,6 +20,8 @@ Brewer.Venda = (function() {
 		this.tabelaItens.on('tabela-itens-atualizada', onValoresAlterados.bind(this));
 		this.valorFreteInput.on('keyup', onValoresAlterados.bind(this));
 		this.valorDescontoInput.on('keyup', onValoresAlterados.bind(this));
+		
+		onValoresAlterados.call(this);//qdo a tela é carregada os calculos são realizados
 	}
 	
 	function onTabelaItensAtualizada(evento, valorTotalItens) {
@@ -51,7 +53,7 @@ $(function() {
 	autocomplete.iniciar();
 	
 	var tabelaItens = new Brewer.TabelaItens(autocomplete);
-	tabelaItens.iniciar();
+	tabelaItens.iniciar();//iniciando venda.tabela-itens.js
 	
 	var venda = new Brewer.Venda(tabelaItens);
 	venda.iniciar();

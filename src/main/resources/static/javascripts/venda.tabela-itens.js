@@ -17,8 +17,17 @@ Brewer.TabelaItens = (function() {
 		this.on = this.emitter.on.bind(this.emitter);
 	}
 	
+	//nosso TabelaItens também é iniciado em venda.js  
 	TabelaItens.prototype.iniciar = function() {
 		this.autocomplete.on('item-selecionado', onItemSelecionado.bind(this));
+	
+		bindQuantidade.call(this);
+		bindTabelaItem.call(this);
+	}
+	
+	TabelaItens.prototype.valorTotal = function() {
+		//esse valorTotal será retornado para venda.js em this.valorTotalItens = this.tabelaItens.valorTotal();
+		return this.tabelaCervejasContainer.data('valor');
 	}
 	
 	function onItemSelecionado(evento, item) {
@@ -37,15 +46,10 @@ Brewer.TabelaItens = (function() {
 	//aula 23-8 9:00
 	function onItemAtualizadoNoServidor(html) {
 		this.tabelaCervejasContainer.html(html);
-		var quantidadeItemInput = $('.js-tabela-cerveja-quantidade-item');
-		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
-		quantidadeItemInput.maskMoney({ precision: 0, thousands: ''});
 		
-		var tabelaItem = $('.js-tabela-item');
-		tabelaItem.on('dblclick', onDoubleClick);//quando da 2 clicks na tela ele exibe opção de excluir
-		//aula 23-10 10:22
-		$('.js-exclusao-item-btn').on('click', onExclusaoItemClick.bind(this));
+		bindQuantidade.call(this);//chamando nesse contexto 23-16 31:20
 		
+		var tabelaItem = bindTabelaItem.call(this);//aula 23-16 32:16
 		this.emitter.trigger('tabela-itens-atualizada', tabelaItem.data('valor-total')); // para pegar o valor total e colocar na tela de vendas no quadro TOTAL. aula 23:12 06:38
 	}
 	
@@ -86,11 +90,25 @@ Brewer.TabelaItens = (function() {
 		resposta.done(onItemAtualizadoNoServidor.bind(this));
 	}
 	
+	function bindQuantidade() {
+		var quantidadeItemInput = $('.js-tabela-cerveja-quantidade-item');
+		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
+		quantidadeItemInput.maskMoney({ precision: 0, thousands: ''});
+	}
+	
+	function bindTabelaItem() {//aula 23-16 32:26
+		var tabelaItem = $('.js-tabela-item');
+		tabelaItem.on('dblclick', onDoubleClick);//quando da 2 clicks na tela ele exibe opção de excluir
+		//aula 23-10 10:22
+		$('.js-exclusao-item-btn').on('click', onExclusaoItemClick.bind(this));
+		return tabelaItem;
+	}
+	
 	return TabelaItens;
 	
 }());
 
-$(function() {
+/*$(function() {
 	
 	var autocomplete = new Brewer.Autocomplete();
 	autocomplete.iniciar();
@@ -99,3 +117,4 @@ $(function() {
 	tabelaItens.iniciar();
 	
 });
+*/

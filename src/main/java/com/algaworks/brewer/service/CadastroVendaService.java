@@ -2,6 +2,7 @@ package com.algaworks.brewer.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class CadastroVendaService {
 		if(venda.isNova()) {
 			venda.setDataCriacao(LocalDateTime.now());
 		}
-		
+		/* ---Retirado na aula 23:16 - 25:48
 		BigDecimal valorTotalItens = venda.getItens().stream()
 				.map(ItemVenda::getValorTotal)
 				.reduce(BigDecimal::add)
@@ -31,18 +32,14 @@ public class CadastroVendaService {
 		BigDecimal valorTotal = calcularValorTotal(valorTotalItens, venda.getValorFrete(), venda.getValorDesconto());
 		//como o valor do frete/desconto não podem ser nulos, então usamos o Optional.ofNullable que retorna um big decimal de zero ou o valor que está no get() - aula 23-15 16:23
 		venda.setValorTotal(valorTotal);
+		*/
 		
 		if(venda.getDataEntrega() != null) {
-			venda.setDataHoraEntrega(LocalDateTime.of(venda.getDataEntrega(),  venda.getHorarioEntrega()));
+			venda.setDataHoraEntrega(LocalDateTime.of(venda.getDataEntrega()
+					, venda.getHorarioEntrega() != null ? venda.getHorarioEntrega() : LocalTime.NOON));
 		}
 		
 		vendas.save(venda);
 	}
 
-	private BigDecimal calcularValorTotal(BigDecimal valorTotalItens, BigDecimal valorFrete, BigDecimal valorDesconto) {
-		BigDecimal valorTotal = valorTotalItens
-				.add(Optional.ofNullable(valorFrete).orElse(BigDecimal.ZERO))
-				.subtract(Optional.ofNullable(valorDesconto).orElse(BigDecimal.ZERO));//No valorTotalItens .add o valor do frete e subtrai o valor de desconto
-		return valorTotal;
-	}
 }

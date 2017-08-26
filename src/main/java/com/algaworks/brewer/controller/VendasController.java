@@ -2,8 +2,6 @@ package com.algaworks.brewer.controller;
 
 import java.util.UUID;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -62,18 +60,27 @@ public class VendasController {
 			venda.setUuid(UUID.randomUUID().toString());			
 		}
 		
+		//para deixar os itens permanentes, caso a tela seja renderizada aula 23-16 21:23
+		mv.addObject("itens", venda.getItens());
+		//aula 23-16 34:35 - iniciando valores do objeto venda
+		mv.addObject("valorFrete", venda.getValorFrete());
+		mv.addObject("valorDesconto", venda.getValorDesconto());
+		mv.addObject("valorTotalItens", tabelaItens.getValorTotal(venda.getUuid()));
 		return mv;
 	}
 	
 	@PostMapping("/nova") //aula 23-15 11:00
-	public ModelAndView salvar(@Valid Venda venda, BindingResult result, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) {
+	public ModelAndView salvar(Venda venda, BindingResult result, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) { //o @Valid foi retirado pra pra validar dentro do método no vendaValidator. Aula 23:16 13:43
+		venda.adicionarItens(tabelaItens.getItens(venda.getUuid()));		
+		venda.calcularValorTotal();//calcula o valor total antes de entrar na validação da tela para setar o valor total no objeto. Aula 23-16 26:59
+		
+		//Esse recurso do spring tira a validação na hora que entra na assinatura no @Valid e passa a executar a validação nesse momento os atributos da tela. Aula 23:16 - 14:22
+		vendaValidator.validate(venda, result);
 		if(result.hasErrors()) {//A validação pra salvar aqui vai usar o VendaValidator que criamos no pacote validator. Aula 23-16 06:56
 			return nova(venda); //não esquecer de acrescentar no html do cadastroVenda o brewer:message
 		}
-		
-		
+				
 		venda.setUsuario(usuarioSistema.getUsuario());
-		venda.adicionarItens(tabelaItens.getItens(venda.getUuid()));
 		
 		cadastroVendaService.salvar(venda);
 		attributes.addFlashAttribute("mensagem", "Venda salva com sucesso");
