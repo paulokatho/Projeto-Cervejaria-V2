@@ -8,6 +8,7 @@ import org.springframework.web.filter.HttpPutFormContentFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 import com.algaworks.brewer.config.JPAConfig;
+import com.algaworks.brewer.config.MailConfig;
 import com.algaworks.brewer.config.SecurityConfig;
 import com.algaworks.brewer.config.ServiceConfig;
 import com.algaworks.brewer.config.WebConfig;
@@ -19,9 +20,14 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 		return new Class<?>[] { JPAConfig.class, ServiceConfig.class, SecurityConfig.class };
 	}
 
+	/***
+	 * MailConfig é inicializado aqui, pois será inicializado com o Thymeleaf, pois é usado html e imagens para enviar o e-mail
+	 * Então colocamos junto com WebConfig para injetar o Thymeleaf.
+	 * Aula 23-2 05:06 
+	 */
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
-		return new Class<?>[] { WebConfig.class };
+		return new Class<?>[] { WebConfig.class, MailConfig.class };
 	}
 
 	@Override
