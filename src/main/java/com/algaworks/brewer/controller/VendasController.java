@@ -116,14 +116,14 @@ public class VendasController {
 	
 	@PostMapping(value = "/nova", params = "enviarEmail") //aula 23-17 08:04
 	public ModelAndView enviarEmail(Venda venda, BindingResult result, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) { //o @Valid foi retirado pra pra validar dentro do método no vendaValidator. Aula 23:16 13:43
-//		validarVenda(venda, result);
-//		if(result.hasErrors()) {
-//			return nova(venda); 
-//		}
-//				
+		validarVenda(venda, result);
+		if(result.hasErrors()) {
+			return nova(venda); 
+		}
+				
 		venda.setUsuario(usuarioSistema.getUsuario());
-//		
-//		cadastroVendaService.salvar(venda);
+		
+		//cadastroVendaService.salvar(venda);
 		
 		mailer.enviar(venda);
 		
