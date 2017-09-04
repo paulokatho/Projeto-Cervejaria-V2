@@ -22,10 +22,11 @@ public class CadastroUsuarioService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
+	//Fazendo tratamento caso tenha salvado senha em branco no banco. Aula 25-3 18:30
 	@Transactional
 	public void salvar(Usuario usuario) {
 		Optional<Usuario> usuarioExistente = usuarios.findByEmail(usuario.getEmail());
-		if (usuarioExistente.isPresent()) {
+		if (usuarioExistente.isPresent() && !usuarioExistente.get().equals(usuario)) {
 			throw new EmailUsuarioJaCadastradoException("E-mail já cadastrado");
 		}
 		
@@ -33,13 +34,20 @@ public class CadastroUsuarioService {
 			throw new SenhaObrigatoriaUsuarioException("Senha é obrigatória para novo usuário");
 		}
 		
-		if (usuario.isNovo()) {
+		if (usuario.isNovo() || !StringUtils.isEmpty(usuario.getSenha())) {
 			usuario.setSenha(this.passwordEncoder.encode(usuario.getSenha()));
-			usuario.setConfirmacaoSenha(usuario.getSenha());
+		} else if (StringUtils.isEmpty(usuario.getSenha())) {
+			usuario.setSenha(usuarioExistente.get().getSenha());
+		}
+		usuario.setConfirmacaoSenha(usuario.getSenha());
+		
+		if (!usuario.isNovo() && usuario.getAtivo() == null) {//se o usuario for novo e nulo seta como 'ativo'. Aula 25-3 23:49
+			usuario.setAtivo(usuarioExistente.get().getAtivo());
 		}
 		
 		usuarios.save(usuario);
 	}
+
 
 	@Transactional // transactional, pois vai fazer alteração nos dados do banco
 	public void alterarStatus(Long[] codigos, StatusUsuario statusUsuario) {

@@ -5,13 +5,14 @@ Brewer.UploadFoto = (function() {
 	function UploadFoto() {
 		this.inputNomeFoto = $('input[name=foto]');
 		this.inputContentType = $('input[name=contentType]');
+		this.novaFoto = $('input[name=novaFoto]');//se ta cadastrando uma nova foto passa por aqui e para que seja acrescentado a string 'temp/'. Aula 25-2 20:14 e 22:35 
 		
 		this.htmlFotoCervejaTemplate = $('#foto-cerveja').html();
 		this.template = Handlebars.compile(this.htmlFotoCervejaTemplate);
 		
 		this.containerFotoCerveja = $('.js-container-foto-cerveja');
 		
-		this.uploadDrop = $('#upload-drop');
+		this.uploadDrop = $('#upload-drop');		
 	}
 	
 	UploadFoto.prototype.iniciar = function () {
@@ -27,17 +28,29 @@ Brewer.UploadFoto = (function() {
 		UIkit.uploadSelect($('#upload-select'), settings);
 		UIkit.uploadDrop(this.uploadDrop, settings);
 		
-		if (this.inputNomeFoto.val()) {
-			onUploadCompleto.call(this, { nome:  this.inputNomeFoto.val(), contentType: this.inputContentType.val()});
+		if (this.inputNomeFoto.val()) {//qdo renderiza a pagina vê se tem foto aí ali em renderizaFoto ele não coloca  o caminho temp/
+			renderizarFoto.call(this, { nome:  this.inputNomeFoto.val(), contentType: this.inputContentType.val()});
 		}
 	}
 	
-	function onUploadCompleto(resposta) {
+	function onUploadCompleto(resposta) {//Se chegar aqui é uma foto nova. Aqui tem que colocar o /temp, pois em FotoCerveja.html não está o caminho completo para a pasta temp para poder funcionar a edição. Aula 25-2 18:56
+		this.novaFoto.val('true');
+		renderizarFoto.call(this, resposta);
+	}
+	
+	function renderizarFoto(resposta) {
 		this.inputNomeFoto.val(resposta.nome);
 		this.inputContentType.val(resposta.contentType);
 		
 		this.uploadDrop.addClass('hidden');
-		var htmlFotoCerveja = this.template({nomeFoto: resposta.nome});
+		
+		var foto = '';//para funcionar inserir foto nova tem que acrescentar caminho 'temp/'. Depois chama ali no foto: foto<-essa é a variavel. Aula 25-2 18:40
+		if (this.novaFoto.val() == 'true') {
+			foto = 'temp/';
+		}
+		foto += resposta.nome;
+		
+		var htmlFotoCerveja = this.template({foto: foto});//foto: está em FotoCerveja.html, funciona para quando clicar para editar a foto. Aula 25-2 16:17
 		this.containerFotoCerveja.append(htmlFotoCerveja);
 		
 		$('.js-remove-foto').on('click', onRemoverFoto.bind(this));
@@ -48,6 +61,7 @@ Brewer.UploadFoto = (function() {
 		this.uploadDrop.removeClass('hidden');
 		this.inputNomeFoto.val('');
 		this.inputContentType.val('');
+		this.novaFoto.val('false');
 	}
 	
 	function adicionarCsrfToken(xhr) {

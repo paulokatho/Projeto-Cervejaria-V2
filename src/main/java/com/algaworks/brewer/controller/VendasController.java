@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -26,6 +27,7 @@ import com.algaworks.brewer.controller.page.PageWrapper;
 import com.algaworks.brewer.controller.validator.VendaValidator;
 import com.algaworks.brewer.mail.Mailer;
 import com.algaworks.brewer.model.Cerveja;
+import com.algaworks.brewer.model.ItemVenda;
 import com.algaworks.brewer.model.StatusVenda;
 import com.algaworks.brewer.model.TipoPessoa;
 import com.algaworks.brewer.model.Venda;
@@ -72,9 +74,7 @@ public class VendasController {
 		ModelAndView mv = new ModelAndView("venda/CadastroVenda");
 		//mv.addObject("uuid", UUID.randomUUID().toString()); //gera um id para cada aba que for aberta no browser, para quando estiver logado como mesmo usuario. Aula 23/11 18:00
 		
-		if(StringUtils.isEmpty(venda.getUuid())) {
-			venda.setUuid(UUID.randomUUID().toString());			
-		}
+		setUuid(venda);// 25-4 06:20
 		
 		//para deixar os itens permanentes, caso a tela seja renderizada aula 23-16 21:23
 		mv.addObject("itens", venda.getItens());
@@ -123,14 +123,14 @@ public class VendasController {
 				
 		venda.setUsuario(usuarioSistema.getUsuario());
 		
-		//cadastroVendaService.salvar(venda);
+		venda = cadastroVendaService.salvar(venda);//o objeto venda já tem a alteração do banco depois de salvar que alteramos em saveAndFlush no service
 		
 		mailer.enviar(venda);
 		
 		//mailer.enviar();
 		//System.out.println("### Logo após a chamado ao método enviar."); //PARA TESTAR A MENSAGERIA ASSÍNCRONA AULA 24-3
 		
-		attributes.addFlashAttribute("mensagem", "Venda salva e e-mail enviado");
+		attributes.addFlashAttribute("mensagem", String.format("Venda nº %d salva e e-mail enviado", venda.getCodigo()));//agora que temos o retorno do que foi salvo no banco podemos informar sucesso na venda código venda.getCodigo no (%d). Aula 24-7 09:44
 		return new ModelAndView("redirect:/vendas/nova");
 	}
 
@@ -155,12 +155,13 @@ public class VendasController {
 	public ModelAndView excluirItem(@PathVariable("codigoCerveja")Cerveja cerveja
 			,@PathVariable String uuid) { //no @PutMapping esta usando o findOne, mas aqui não precisa, pois colocamos o domain no webConfig aula 23-10 08:20
 		tabelaItens.excluirItem(uuid, cerveja);
+		
 		return mvTabelaItensVenda(uuid);
 	}
 	
 	@GetMapping
 	public ModelAndView pesquisar(VendaFilter vendaFilter,
-			@PageableDefault(size = 3) Pageable pageable, HttpServletRequest httpServletRequest) {
+			@PageableDefault(size = 10) Pageable pageable, HttpServletRequest httpServletRequest) {
 		ModelAndView mv = new ModelAndView("/venda/PesquisaVendas");
 		mv.addObject("todosStatus", StatusVenda.values());
 		mv.addObject("tiposPessoa", TipoPessoa.values());
@@ -168,14 +169,47 @@ public class VendasController {
 		PageWrapper<Venda> paginaWrapper = new PageWrapper<>(vendas.filtrar(vendaFilter, pageable)
 				, httpServletRequest);
 		mv.addObject("pagina", paginaWrapper);
-		return mv;
 		
+		return mv;
+	}
+	/*
+	 	Para realizar a edição também tem que mudar o cadastroVenda e PesquisaVenda.html
+	 	Também lembrar de setar a dataCriacao() em CadastroVendaService no método salvar. 25-4 10:15
+	 */
+	@GetMapping("/{codigo}")
+	private ModelAndView editar(@PathVariable Long codigo) {//Mesma ideia da edição de usuarios. Buscar vendas com os itens carregados. Aula 25-4 02:30.
+		Venda venda = vendas.buscarComItens(codigo);
+		
+		//Depois que carregamos a 'venda' temos que percorrer ela e inserir as vendas dentro da tabelaVendas. Aula 25-4 04:33
+		setUuid(venda);//precisamos mudar a logica antiga aqui e setar o uuid em metodo externo para poder pegar ele lá no novo e depois aqui no adicionarItem, se não vai dar erro. 25-4 06:20
+		for (ItemVenda item : venda.getItens()) {
+			tabelaItens.adicionarItem(venda.getUuid(), item.getCerveja(), item.getQuantidade());
+		}
+		
+		ModelAndView mv = nova(venda);
+		mv.addObject(venda);
+		
+		return mv;
+	}
+	
+	@PostMapping(value = "/nova", params = "cancelar")
+	public ModelAndView cancelar(Venda venda, BindingResult result
+				, RedirectAttributes attributes, @AuthenticationPrincipal UsuarioSistema usuarioSistema) {
+		try {
+			cadastroVendaService.cancelar(venda);
+		} catch (AccessDeniedException e) {
+			return new ModelAndView("/403");//pode mandar para qq página, mas vamos ficar com essa mesmo. 25-5 08:50
+		}
+		
+		attributes.addFlashAttribute("mensagem", "Venda cancelada com sucesso");
+		return new ModelAndView("redirect:/vendas/" + venda.getCodigo());
 	}
 
 	private ModelAndView mvTabelaItensVenda(String uuid) {
 		ModelAndView mv = new ModelAndView("venda/TabelaItensVenda");
 		mv.addObject("itens", tabelaItens.getItens(uuid));
 		mv.addObject("valorTotal", tabelaItens.getValorTotal(uuid));//para capturar o valor total para exibir no quadro da tela de vendas. Aula 23:12 07:30
+		
 		return mv;
 	}
 
@@ -185,6 +219,12 @@ public class VendasController {
 		
 		//Esse recurso do spring tira a validação na hora que entra na assinatura no @Valid e passa a executar a validação nesse momento os atributos da tela. Aula 23:16 - 14:22
 		vendaValidator.validate(venda, result);
+	}
+	
+	private void setUuid(Venda venda) {
+		if(StringUtils.isEmpty(venda.getUuid())) {
+			venda.setUuid(UUID.randomUUID().toString());			
+		}
 	}
 
 }

@@ -55,7 +55,7 @@ public class Usuario implements Serializable {
 	//na doc da anotação @Size diz que suporta um list ou set e assim é possível especificar um valor mínimo
 	//Aqui não precisa de cascade, pois o grupo já, 
 	@Size(min = 1, message = "Selecione pelo menos um grupo")
-	@ManyToMany
+	@ManyToMany//ToMany não é carregado com usuario e por isso dá erro de 'lazily inicitialize '. Mais comentário no UsuariosController no metodo editar. Aula 03:09
 	@JoinTable(name = "usuario_grupo", joinColumns = @JoinColumn(name = "codigo_usuario")
 				, inverseJoinColumns = @JoinColumn(name = "codigo_grupo"))	
 	private List<Grupo> grupos;

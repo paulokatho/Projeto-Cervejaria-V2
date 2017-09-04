@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +49,7 @@ public class UsuariosController {
 		return mv;
 	}
 	
-	@PostMapping("/novo")
+	@PostMapping({"/novo", "{\\+d}" })
 	public ModelAndView salvar(@Valid Usuario usuario, BindingResult result, RedirectAttributes attributes) {
 		if (result.hasErrors()) {
 			return novo(usuario);
@@ -113,5 +114,26 @@ public class UsuariosController {
 		 	
 		 	Em brewer.css foi somente acrescentado '.table-usuarios-col-status: width = 30px;'
 		 */
+	}
+	
+	/**
+	 * Aqui temos que tratar o relacionamento com grupo, pois tem o ralacionamento manyToMany e por default tudo que tem 'ToMany' não inicializado
+	 * 	com o objeto principal, nesse caso usuario.
+	 * Em Usuario.java no @ManyToMany não podemos usar o fechType.EAGER para inicializar grupos e corrigir o problema, pois nao queremos carregar todos os 
+	 * 	grupos quando Usuario for carregado. Então vamos inicializar somente quando nós precisarmos. Isso quer dizer buscar Usuario já com os grupos só na 
+	 * 	edição.
+	 * E por isso vamos inicializar o usuario com os grupos no método, usuarios.buscarComGrupos(codigo), buscando por código.
+	 * Mudar UsuariosQueries
+	 * 
+	 * @param usuario
+	 * @return
+	 */
+	@GetMapping("/{codigo}")
+	public ModelAndView editar(@PathVariable Long codigo) {//o Long codigo é recebe o "/{codigo}", nesse formato para corrigir problema de edição com ManyToMany de grupos.
+		Usuario usuario = usuarios.buscarComGrupos(codigo);
+		ModelAndView mv = novo(usuario);
+		mv.addObject(usuario);
+		
+		return mv;
 	}
 }

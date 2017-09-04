@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Max;
@@ -83,6 +84,9 @@ public class Cerveja implements Serializable {
 
 	@Column(name = "content_type")
 	private String contentType;
+	
+	@Transient//pois é possivel ser validado na tela. Usado em cerveja.upload-foto e CadastroCerveja. Aula 25-2 22:10
+	private boolean novaFoto;
 
 	@PrePersist
 	@PreUpdate
@@ -196,6 +200,22 @@ public class Cerveja implements Serializable {
 	
 	public String getFotoOuMock() {
 		return !StringUtils.isEmpty(foto) ? foto : "cerveja-mock.png";
+	}
+
+	public boolean temFoto() {//aula 24-6 38:35
+		return !StringUtils.isEmpty(this.foto);
+	}
+	
+	public boolean isNova() {//Aula 25-2 03:20
+		return codigo == null;//se esse codigo for null quer dizer que é uma cerveja nova
+	}
+	
+	public boolean isNovaFoto() {
+		return novaFoto;
+	}
+
+	public void setNovaFoto(boolean novaFoto) {
+		this.novaFoto = novaFoto;
 	}
 
 	@Override

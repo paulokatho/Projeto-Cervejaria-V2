@@ -12,4 +12,8 @@ public interface FotoStorage {
 
 	public byte[] recuperar(String foto);
 	
+	public byte[] recuperarThumbnail(String fotoCerveja);//para recuperar thumbnail da imagem para exibir no email em Mailer. Aula 24-6 27:10
+
+	public void excluir(String foto);
+	
 }

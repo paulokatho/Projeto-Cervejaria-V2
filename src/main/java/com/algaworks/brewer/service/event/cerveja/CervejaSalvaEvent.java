@@ -20,4 +20,8 @@ public class CervejaSalvaEvent {
 		return !StringUtils.isEmpty(cerveja.getFoto());
 	}
 	
+	public boolean isNovaFoto() {//usado em CervejaListener, pois só pode salvar a foto caso a foto seja nova. Aula 25-2 28:48
+		return cerveja.isNovaFoto();
+	}
+	
 }

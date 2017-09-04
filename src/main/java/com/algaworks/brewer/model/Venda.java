@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +23,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.DynamicUpdate;
+
 @Entity
 @Table(name = "venda")
+@DynamicUpdate//Para o cancelamento de venda, pois é somente para atualizar o status. 25-5 04:40
 public class Venda {
 
 	@Id
@@ -58,7 +62,13 @@ public class Venda {
 	@Enumerated(EnumType.STRING)
 	private StatusVenda status = StatusVenda.ORCAMENTO;
 
-	@OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
+	/***
+	 * Quando um venda é editada, os itens tem que ser removidos do banco e inserinos em um novo registro, e assim esse novo registro 
+	 * 	deve ser o unico no banco e o antigo apagado. Se não o banco fica inconsistente. A coleção de itens não pode ficar orfã.
+	 * É muito importante lembrar desse recurso e sempre verificar no banco de dados se realmente está sendo salvo certinho tudo.
+	 * O 'orphanRemoval' está na Aula 25-5 13:40
+	 */
+	@OneToMany(mappedBy = "venda", cascade = CascadeType.ALL ,orphanRemoval = true)
 	private List<ItemVenda> itens = new ArrayList<>(); //inicializando o array para não correr risco de dar null pointer exception
 
 	@Transient
@@ -200,6 +210,32 @@ public class Venda {
 	
 	public void calcularValorTotal() { //deixando o serviço de calculo para que o valorTotal permaneça na tela quando, por exemplo a tela é renderizada ao clicar em salvar e a validação for acionada. Aula 23-16 25:46		
 		this.valorTotal = calcularValorTotal(getValorTotalItens(), getValorFrete(), getValorDesconto());
+	}
+	
+	/**
+	 * Verifica a quntidade de dias que tem o orçamento.
+	 * 'inicio' recebe a data de criação ou o horario atual(quando for uma nova venda)
+	 * ChronoUnit verifica em dias a diferença entre a data 'inicio' e a data de agora 'now()'
+	 * Depois de implementar utilizamos na tela de CadastroVenda.html para utilizar no box Criação exibindo quando foi realizado o orçamento
+	 * Aula 25-4 19:45
+	 * @return
+	 */
+	public Long getDiasCriacao() {
+		LocalDate inicio = dataCriacao != null ? dataCriacao.toLocalDate() : LocalDate.now();
+		return ChronoUnit.DAYS.between(inicio, LocalDate.now());
+	}
+	
+	public boolean isSalvarPermitido() {
+		return !status.equals(StatusVenda.CANCELADA);
+	}
+	
+	/**
+	 * Esse metodo e o de cima utilizados na tela de venda para desabilitar os botoes caso o usuario não tenha permissão para cancelar ou editar a venda.
+	 * 25-5 17:40
+	 * @return
+	 */
+	public boolean isSalvarProibido() {
+		return !isSalvarPermitido();
 	}
 	
 	private BigDecimal calcularValorTotal(BigDecimal valorTotalItens, BigDecimal valorFrete, BigDecimal valorDesconto) {

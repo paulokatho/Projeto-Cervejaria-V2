@@ -18,7 +18,7 @@ public class PageWrapper<T> {
 		this.page = page;
 		String httpUrl = httpServletRequest.getRequestURL().append(
 				httpServletRequest.getQueryString() != null ? "?" + httpServletRequest.getQueryString() : "")
-				.toString().replaceAll("\\+", "%20");
+				.toString().replaceAll("\\+", "%20").replaceAll("excluido", "");//substituir 'excluido' por vazio para quando excluir cervejas não ficar aparecendo pop de Ok, caso vamos ordenar a pesquisa.Aula 25-1 25:15
 		this.uriBuilder = UriComponentsBuilder.fromHttpUrl(httpUrl);
 	}
 	

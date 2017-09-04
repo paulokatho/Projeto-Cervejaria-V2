@@ -1,4 +1,6 @@
-Brewer = Brewer || {}; //aula 23-17 07:00
+//aula 23-17 07:00
+
+Brewer = Brewer || {};
 
 Brewer.BotaoSubmit = (function() {
 	
