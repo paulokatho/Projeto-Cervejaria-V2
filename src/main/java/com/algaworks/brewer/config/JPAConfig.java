@@ -49,6 +49,7 @@ public class JPAConfig {
 		factory.setDataSource(dataSource);
 		factory.setJpaVendorAdapter(jpaVendorAdapter);
 		factory.setPackagesToScan(Cerveja.class.getPackage().getName());
+		factory.setMappingResources("sql/consultas-nativas.xml");//ensinando ao jpa onde fica o arquivo consultas-vendas para poder utilizar em consultas nativas. Aula 26-5 11:20
 		factory.afterPropertiesSet();
 		return factory.getObject();
 	}

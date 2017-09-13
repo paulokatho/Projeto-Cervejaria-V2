@@ -1,7 +1,13 @@
 package com.algaworks.brewer.repository.helper.venda;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
+import java.time.Year;
+import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.algaworks.brewer.dto.VendaMes;
+import com.algaworks.brewer.model.StatusVenda;
 import com.algaworks.brewer.model.TipoPessoa;
 import com.algaworks.brewer.model.Venda;
 import com.algaworks.brewer.repository.filter.VendaFilter;
@@ -43,13 +51,79 @@ public class VendasImpl implements VendasQueries {
 		return new PageImpl<>(criteria.list(), pageable, total(filtro));
 	}
 	
+	@Transactional(readOnly = true)
+	@Override
+	public Venda buscarComItens(Long codigo) {
+		Criteria criteria = manager.unwrap(Session.class).createCriteria(Venda.class);
+		criteria.createAlias("itens", "i", JoinType.LEFT_OUTER_JOIN);//iniciliza e traz os grupos
+		criteria.add(Restrictions.eq("codigo", codigo));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//faz um distinct pela entidade principal usuario (1 usuario, N grupos)
+		return (Venda) criteria.uniqueResult();
+	}
+	
+	@Override
+	public BigDecimal valorTotalNoAno() {
+		Optional<BigDecimal> optional = Optional.ofNullable(
+				manager.createQuery("select sum(valorTotal) from Venda where year(dataCriacao) = :ano and status = :status", BigDecimal.class)
+					.setParameter("ano", Year.now().getValue())
+					.setParameter("status", StatusVenda.EMITIDA)
+					.getSingleResult());
+		return optional.orElse(BigDecimal.ZERO);
+	}
+	
+	@Override
+	public BigDecimal valorTotalNoMes() {
+		Optional<BigDecimal> optional = Optional.ofNullable(
+				manager.createQuery("select sum(valorTotal) from Venda where month(dataCriacao) = :mes and status = :status", BigDecimal.class)
+					.setParameter("mes", MonthDay.now().getMonthValue())
+					.setParameter("status", StatusVenda.EMITIDA)
+					.getSingleResult());
+		return optional.orElse(BigDecimal.ZERO);
+	}
+	
+	@Override
+	public BigDecimal valorTicketMedioNoAno() {
+		Optional<BigDecimal> optional = Optional.ofNullable(
+				manager.createQuery("select sum(valorTotal)/count(*) from Venda where year(dataCriacao) = :ano and status = :status", BigDecimal.class)
+					.setParameter("ano", Year.now().getValue())
+					.setParameter("status", StatusVenda.EMITIDA)
+					.getSingleResult());
+		return optional.orElse(BigDecimal.ZERO);
+	}
+	
+	/**
+	 * Aqui é necessario informar para o JPAConfig onde estão as consultas nativas para o totalPorMes conseguir enxergar a pasta 'sql/consultas-nativas.xml' em entityManagerFactory(). Aula 26-5 11:00
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<VendaMes> totalPorMes() {
+		//return manager.createNamedQuery("Vendas.totalPorMes").getResultList();
+		List<VendaMes> vendasMes = manager.createNamedQuery("Vendas.totalPorMes").getResultList();
+		
+		/* Lógica para pegar corrigir o erro quando algum mes não tiver venda e poder aparecer no dashboard. Aula 25-6 21:06*/
+		LocalDate hoje = LocalDate.now();//pegando a data de hoje
+		for (int i = 1; i <= 6; i++) {//for para percorrer a lista de 6 meses
+			String mesIdeal = String.format("%d/%02d", hoje.getYear(), hoje.getMonthValue());//mes e ano atuais
+			
+			//possuiMes filtra no vendasMes se 'v.mes se existe(equals) o mes ideal, então procura qualquer um que esteja presente
+			boolean possuiMes = vendasMes.stream().filter(v -> v.getMes().equals(mesIdeal)).findAny().isPresent();
+			if (!possuiMes) {//se caso o não existir valor no possuiMes adicionamos o valor '0' para que no gráfico fique pontuado o dashboard apontando o mês com valor '0'
+				vendasMes.add(i - 1, new VendaMes(mesIdeal, 0));
+			}
+			
+			hoje = hoje.minusMonths(1);
+		}
+		
+		return vendasMes;
+	}
+	
 	private Long total(VendaFilter filtro) {
 		Criteria criteria = manager.unwrap(Session.class).createCriteria(Venda.class);
 		adicionarFiltro(filtro, criteria);
 		criteria.setProjection(Projections.rowCount());
 		return (Long) criteria.uniqueResult();
 	}
-	
+
 	private void adicionarFiltro(VendaFilter filtro, Criteria criteria) {
 		criteria.createAlias("cliente", "c");
 		
@@ -90,14 +164,6 @@ public class VendasImpl implements VendasQueries {
 		}
 	}
 	
-	@Transactional(readOnly = true)
-	@Override
-	public Venda buscarComItens(Long codigo) {
-		Criteria criteria = manager.unwrap(Session.class).createCriteria(Venda.class);
-		criteria.createAlias("itens", "i", JoinType.LEFT_OUTER_JOIN);//iniciliza e traz os grupos
-		criteria.add(Restrictions.eq("codigo", codigo));
-		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//faz um distinct pela entidade principal usuario (1 usuario, N grupos)
-		return (Venda) criteria.uniqueResult();
-	}
+
 
 }
