@@ -18,9 +18,9 @@
 	<div class="page-header">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="col-xs-10">
-					<h1 th:if="${venda.nova}">Cadastro de venda</h1><!-- Verificar se existe o atributo isNova dentro da classe Venda.java -->
-					<h1 th:unless="${venda.nova}">Edição da venda nº [[${venda.codigo}]]</h1>
+				<div class="col-xs-10"><!-- o th:text="#{}" abaixo serve para poder fazer a I17 ele substitui o text de acordo com o Accept Header que vem do browser e esta no message.properties. Aula 27-2 03:40-->
+					<h1 th:if="${venda.nova}" th:text="#{venda.cadastro.titulo}">Cadastro de venda</h1><!-- Verificar se existe o atributo isNova dentro da classe Venda.java -->
+					<h1 th:unless="${venda.nova}" th:text="#{venda.edicao.titulo(${venda.codigo})}">Edição da venda nº </h1>
 				</div>
 			</div>
 		</div>

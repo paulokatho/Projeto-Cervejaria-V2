@@ -38,10 +38,10 @@ public class Cerveja implements Serializable {
 	private Long codigo;
 
 	@SKU
-	@NotBlank(message = "SKU é obrigatório")
+	@NotBlank//onde for @NotBlank vai pegar a validação que está no message.properties. Aula 27-3 06:50
 	private String sku;
 
-	@NotBlank(message = "Nome é obrigatório")
+	@NotBlank//A mensagem de validação está no messages.properties. Aula 27-3 08:00
 	private String nome;
 
 	@NotBlank(message = "A descrição é obrigatória")

@@ -1,0 +1,84 @@
+
+	--- Questões de internacionalização ---
+
+Duas perguntas:
+
+1) Estou tentando fazer a internacionalização da label de ordenação das pesquisas, mas não está dando certo.
+Acrescentei no html a tag TH
+<brewer:order page="${pagina}" field="sku" th:text="#{label.sku}"/>
+
+No processador (OrderElementTagProcessor) acrescentei o th na leitura do atributo
+IAttribute text = tag.getAttribute("th:text");
+
+Mas ele não reconhece e me traz uma string #{label.cliente}
+
+2) Quanto tenho uma anotação, por exemplo @NotNull
+Objeto Grupo
+@NotNull(message = "Selecione pelo menos um grupo")
+private List<Permissao> permissoes;
+
+Objeto Cerveja
+@NotNull (message = "Teor Alcoolico obrigatorio")
+private BigDecimal teorAlcoolico;
+
+Como faço para personalizar a mensagem?
+
+---Resposta ---
+
+1. Você vai precisar fazer parecido com o que foi feito nessa classe:
+
+https://github.com/algaworks/curso-sistemas-web-com-spring-javascript-bootstrap/blob/master/27.3-internacionalizando-as-mensagens-de-validacao/brewer/src/main/java/com/algaworks/brewer/thymeleaf/processor/MenuAttributeTagProcessor.java
+
+... para pegar o valor da variável "menu".
+
+2. Você vai precisar colocar a expressão dentro de message e a tradução dentro de um arquivo chamado ValidationMessages.properties que vai ficar na raiz da aplicação.
+
+----Pergunta----
+
+O sistema Brewer ficou internacionalizado de acordo com a preferência que o usuário escolhe para o browser.
+
+Mas e se eu quiser colocar a opção de linguagem para o usuário escolher dentro do sistema?
+Quero dizer, deixar o usuário escolher dinamicamente a opção de idioma.
+Por exemplo, colocando um Locale na classe Usuario e permitir que o usuário escolha a opção que ele prefira.
+
+Você retirou o bean LocaleResolver do WebConfig.
+Como eu confiro o Locale dinamicamente então? 
+
+	- Resposta -
+
+	Opa, vamos lá.
+
+	Você precisaria criar o link para o usuário clicar e nesse link passaria o parâmetro locale=pt_BR e em outro locale=en_US por exemplo.
+
+	No código o Spring já faz quase tudo pra gente, só precisamos no WebConfig adicionar o código abaixo:
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+	  registry.addInterceptor(new LocaleChangeInterceptor());
+	}
+
+	@Bean
+	public LocaleResolver localeResolver(){
+	  return new CookieLocaleResolver();
+	}
+
+	Nesse código estamos adicionando um interceptador que irá identificar o parâmetro "locale" e alterará o idioma pra gente armazenando nos cookies do navegador. 
+
+-----Pergunta----
+
+Legal. Fiz todos os testes aqui e funcionou perfeitamente. Obrigado.
+
+Pelo que notei, basta passar uma vez o locale=xx_XX que o Spring guarda essa informação. A partir de então, o sistema sempre responde com o Content-Language do Response Headers com o idioma informado.
+
+Mas tem como eu interceptar a requisição quando o usuário passar o locale?
+
+Por que eu testei passando locale=fr_FR e o sistema passou a responder em francês. Como não tem nada de francês nem no sistema nem no navegador, o sistema ficou em inglês (padrão do meu navegador).
+
+Eu queria interceptar para poder ignorar idiomas não suportados e também para exibir na tela o idioma atual. 
+
+	- Resposta -
+
+	Hum.. talvez você consiga criar o seu interceptador sim e passar no lugar de LocaleChangeInterceptor.
+
+	Se você especializar essa classe e tentar dar o seu comportamento, acredito que possa fazer o que quer. 
+

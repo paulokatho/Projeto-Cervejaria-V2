@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,12 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.algaworks.brewer.model.StatusVenda;
 import com.algaworks.brewer.model.Venda;
 import com.algaworks.brewer.repository.Vendas;
+import com.algaworks.brewer.service.event.venda.VendaEvent;
 
 @Service
 public class CadastroVendaService {
 
 	@Autowired
 	private Vendas vendas;
+	
+	@Autowired
+	private ApplicationEventPublisher publisher;
 	
 	@Transactional
 	public Venda salvar(Venda venda) {
@@ -48,6 +53,9 @@ public class CadastroVendaService {
 	public void emitir(Venda venda) {
 		venda.setStatus(StatusVenda.EMITIDA);
 		salvar(venda);
+		
+		//o publisher vai cair em VendaEmitida que é um listener.
+		publisher.publishEvent(new VendaEvent(venda));//publicando uma venda para decrementar do box de itens no estoque na tela Dashboard.html. Aula 26-7 01:00
 		
 	}
 
