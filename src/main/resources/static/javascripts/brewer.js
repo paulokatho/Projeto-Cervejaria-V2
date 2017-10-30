@@ -8,8 +8,10 @@ Brewer.MaskMoney = (function() {
 	}
 	
 	MaskMoney.prototype.enable = function() {
-		this.decimal.maskMoney({ decimal: ',', thousands: '.' });
-		this.plain.maskMoney({ precision: 0, thousands: '.' });
+		//this.decimal.maskMoney({ decimal: ',', thousands: '.' });//modificado toda a mascara para moeda na Aula 28-1 04:05
+		//this.plain.maskMoney({ precision: 0, thousands: '.' });
+		this.decimal.maskNumber({ decimal: ',', thousands: '.' });
+		this.plain.maskNumber({ integer: true, thousands: '.' });//aqui estou informando que é inteiro e que o separador é '.' na milhar.
 	}
 	
 	return MaskMoney;

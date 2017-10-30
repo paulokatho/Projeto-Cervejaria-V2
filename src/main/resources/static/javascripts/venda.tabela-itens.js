@@ -92,8 +92,10 @@ Brewer.TabelaItens = (function() {
 	
 	function bindQuantidade() {
 		var quantidadeItemInput = $('.js-tabela-cerveja-quantidade-item');
-		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado
-		quantidadeItemInput.maskMoney({ precision: 0, thousands: ''});
+		//quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));//renderiza a tabela na tela com o item selecionado //***deixou de funfar por causa do maskNumber, pois chama toda hora o change ao digitar. na Aula 28-1.
+		quantidadeItemInput.on('blur', onQuantidadeItemAlterado.bind(this)); // Você vai alterar para blur como aqui Aula 28-1
+		//quantidadeItemInput.maskMoney({ precision: 0, thousands: ''}); //aqui tbm tem que mudar para maskNumber, mas vou ver em outra aula. Aula 28-1
+		quantidadeItemInput.maskNumber({ integer: true, thousands: '' });//Peguei a alteração da aula 29-4
 	}
 	
 	function bindTabelaItem() {//aula 23-16 32:26
