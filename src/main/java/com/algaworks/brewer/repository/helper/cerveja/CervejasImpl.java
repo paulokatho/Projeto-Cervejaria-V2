@@ -22,6 +22,7 @@ import com.algaworks.brewer.dto.ValorItensEstoque;
 import com.algaworks.brewer.model.Cerveja;
 import com.algaworks.brewer.repository.filter.CervejaFilter;
 import com.algaworks.brewer.repository.paginacao.PaginacaoUtil;
+import com.algaworks.brewer.storage.FotoStorage;
 
 /***
  * 
@@ -43,6 +44,9 @@ public class CervejasImpl implements CervejasQueries {
 	@Autowired
 	private PaginacaoUtil paginacaoUtil;
 	
+	@Autowired
+	private FotoStorage fotoStorage;//conseguimos injetar uma classe, pois esse bean é mapeado pelo Spring e não pelo jpa, por exemplo
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)
@@ -53,6 +57,19 @@ public class CervejasImpl implements CervejasQueries {
 		adicionarFiltro(filtro, criteria);
 		
 		return new PageImpl<>(criteria.list(), pageable, total(filtro));
+	}
+	
+	@Override
+	public List<CervejaDTO> porSkuOuNome(String skuOuNome) {
+		String jpql = "select new com.algaworks.brewer.dto.CervejaDTO(codigo, sku, nome, origem, valor, foto) "
+				+ "from Cerveja where lower(sku) like lower(:skuOuNome) or lower(nome) like lower(:skuOuNome)";
+		List<CervejaDTO> cervejasFiltradas = manager.createQuery(jpql, CervejaDTO.class)
+				.setParameter("skuOuNome", skuOuNome + "%")
+				.getResultList();
+		//condição colocada na aula 28.05 39:50 para cada foto da lista pegar o nome e a url pra exibir na VendaCerveja.html
+		cervejasFiltradas.forEach(c -> c.setUrlThumbnailFoto(fotoStorage.getUrl(FotoStorage.THUMBNAIL_PREFIX + c.getFoto())));//Ali no CervejaDTO já fala se a cerveja é mock ou não na hora de exibir
+		
+		return cervejasFiltradas;
 	}
 	
 	@Override
@@ -104,15 +121,6 @@ public class CervejasImpl implements CervejasQueries {
 		return filtro.getEstilo() != null && filtro.getEstilo().getCodigo() != null;
 	}
 
-	@Override
-	public List<CervejaDTO> porSkuOuNome(String skuOuNome) {
-		String jpql = "select new com.algaworks.brewer.dto.CervejaDTO(codigo, sku, nome, origem, valor, foto) "
-				+ "from Cerveja where lower(sku) like lower(:skuOuNome) or lower(nome) like lower(:skuOuNome)";
-		List<CervejaDTO> cervejasFiltradas = manager.createQuery(jpql, CervejaDTO.class)
-					.setParameter("skuOuNome", skuOuNome + "%")
-					.getResultList();
-		return cervejasFiltradas;
-	}
 
 
 }

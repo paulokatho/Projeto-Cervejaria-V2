@@ -3,7 +3,7 @@
 		<div class="col-md-4"></div>
 		<div class="col-md-4  text-center">
 			<a href="#" class="thumbnail">
-				<img th:src="@{/fotos/{{foto}}}"></img>
+				<img src="{{url}}"></img>
 			</a>
 			<button type="button" class="btn  btn-link  js-remove-foto"><span class="glyphicon  glyphicon-remove"></span></button>
 		</div>
@@ -12,3 +12,13 @@
 </script>
 
 <!-- {foto} vai para cerveja.upload-foto.js em onUploadFotoCompleto. Aula 25-2 16:21 -->
+
+<!-- <img th:src="@{/fotos/{{foto}}}"></img> foi substituido na aula 28-5 16:49, pois estamos implementando a conta na Amazon S3, onde
+		as fotos serão armazenadas na nuvem e então serão passadas via url, mas levando em consideração o perfil que está acessando,
+		pois se for perfil de desenvolvimento ele armazena localmente ainda, maiores detalhes em FotoStorage.
+		Esse scritp é chamado em cadastro cerveja no th:block hbs/FotoCerveja e esse {/fotos} estava mapeado para FotosController e dentro do 
+		 metodo recuperar() está chamando de volta, com essa alteração não vai chamar mais, pois vai estar na nuvem.
+		 
+		 Também mudamos cerveja.upload-foto ver aula 28-05 17:10.
+		 
+		  -->

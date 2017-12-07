@@ -5,9 +5,44 @@
 
 	<groupId>com.algaworks</groupId>
 	<artifactId>brewer</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version> <!-- *** Ver o esquema de deploy em tomcat externo mais abaixo. Aula 28-3 00:15*** -->
 
 	<packaging>war</packaging>
+	
+	<!-- 
+		É muito comum as empresas terem um servidor dedicado, com o Linux instalado e aí tem um tomcat instalado para 
+			poder fazer deploy da sua aplicação. Empresas de medio e grande porte, isso é bem comum.
+		Também é possível ter uma maquina completa em algum lugar na nuvem. Ter uma maquina inteira pra instalar o que
+			você quiser, como java, tomcat. O esquema na Aula 28-03 00:43 é para aprender fazer uma maquina sua 
+			tipo de empresa (Dedicado) e também na nuvem completa.
+		Para isso precisamos do java 8 jdk (no mínimo para essa nossa aplicação java 8), tomcat instalado/descompactado, 
+			coloca as libs dentro dele e ja libera o projeto dentro dele.
+		O processo de liberação de um projeto pode variar de empresas pra empresas. Existem ferramentas que auxiliam
+			você a fazer isso.
+		Ver artigo http://dzone.com/articles/whi-i-never-use-maven-release
+		Na tag <fileName> vai estar a forma padrão de como vai ser gerado nosso arquivo war, esse padrão geralmente é 
+			${artifactId}-${version}, mas vamos utilizar o artifactId nessa aula e aí o arquivo vai ser gerado com o nome
+			brewer.war.
+		Na hora de gerar o build e empacotar o projeto é só clicar com o botão direito no projeto e clicar em run as> build...
+		Name = brewer - Package
+		Goals = clean Package // limpa o projeto e gera o .war
+		
+		Depois que clicar no <run> ele vai gerar dentro da pasta target o nosso .war
+		Vai ter algo como, Building war: C:\Eclipse Mars\Dev\Projetos\brewer\target\brewer.war
+		Copiar esse arquivo para a pasta do tomcat/webapps, exemplo c:\apache-tomcat-8.0.35/webapps 
+		
+		Ir até o caminho pelo terminal linux ou copiar o .war para a pasta webapps do nosso tomcat.
+		Ex: mnt/c/Eclipse Mars/Ferramentas/apache-tomcat-8.0.36-windows-x64/apache-tomcat-8.0.36/webapps
+		
+		Depois no caso do linux ou mac ir para a basta bin do apache e procurar pelo ./startup.bat no windows e no linux
+			fica ./startup.sh
+		O tomcat vai começar a rodar a aplicação e é possível acompanhar o log pelo indo até o diretorio pelo terminal
+			em /logs dentro do tomcat ainda e então digitar tail -f catalina.out 
+			e então vai começar a exibir o log da aplicação.
+			
+		Esse recurso é possível usar quando se tem um servidor dedicado ou um maquina completa na nuvem.	
+		
+	 -->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -73,9 +108,15 @@
 		<!-- Java Mail -->
 		<javax.mail.version>1.5.6</javax.mail.version>
 		
+		<!-- AWS SDK - S3 -->
+		<aws-java-sdk-s3.version>1.10.77</aws-java-sdk-s3.version>
+		
 	</properties>
 
 	<build>
+	
+		<finalName>${artifactId}</finalName>
+		
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -304,6 +345,14 @@
 			<artifactId>javax.mail</artifactId>
 			<version>${javax.mail.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		
+		<!-- AWS SDK - S3 --> 
+		<!-- Para usar bucket da Amazon para guardar nossas imagens lá. So essa versão funcionou certinho. Aula 28.4 09:22 -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>${aws-java-sdk-s3.version}</version>
 		</dependency>
 		
 	</dependencies>

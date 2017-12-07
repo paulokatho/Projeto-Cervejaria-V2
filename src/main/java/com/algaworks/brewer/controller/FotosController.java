@@ -14,6 +14,13 @@ import com.algaworks.brewer.dto.FotoDTO;
 import com.algaworks.brewer.storage.FotoStorage;
 import com.algaworks.brewer.storage.FotoStorageRunnable;
 
+/***
+ * 
+ * @author Katho
+ * Foi alterado o modo de salvar as fotos na aula 28:05.
+ * Explicação na Classe FotoStorage e ServiceConfig
+ */
+
 @RestController
 @RequestMapping("/fotos")
 public class FotosController {
@@ -31,10 +38,10 @@ public class FotosController {
 		return resultado;
 	}
 	
-	@GetMapping("/temp/{nome:.*}")
+	/*@GetMapping("/temp/{nome:.*}")-- Tirado na aula 28.05 05:09 *** Tem comentario na classe Foto Storage
 	public byte[] recuperarFotoTemporaria(@PathVariable String nome) {
 		return fotoStorage.recuperarFotoTemporaria(nome);
-	}
+	}*/
 	
 	@GetMapping("/{nome:.*}")
 	public byte[] recuperar(@PathVariable String nome) {

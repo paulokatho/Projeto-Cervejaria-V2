@@ -6,6 +6,7 @@ Brewer.UploadFoto = (function() {
 		this.inputNomeFoto = $('input[name=foto]');
 		this.inputContentType = $('input[name=contentType]');
 		this.novaFoto = $('input[name=novaFoto]');//se ta cadastrando uma nova foto passa por aqui e para que seja acrescentado a string 'temp/'. Aula 25-2 20:14 e 22:35 
+		this.inputUrlFoto = $('input[name=urlFoto]');//seta a url com nome da foto para fz o upload de foto. Precisamos desse kara na Classe Cervela.java. Aula 28.05 23:11 e 24:40
 		
 		this.htmlFotoCervejaTemplate = $('#foto-cerveja').html();
 		this.template = Handlebars.compile(this.htmlFotoCervejaTemplate);
@@ -29,12 +30,16 @@ Brewer.UploadFoto = (function() {
 		UIkit.uploadDrop(this.uploadDrop, settings);
 		
 		if (this.inputNomeFoto.val()) {//qdo renderiza a pagina vê se tem foto aí ali em renderizaFoto ele não coloca  o caminho temp/
-			renderizarFoto.call(this, { nome:  this.inputNomeFoto.val(), contentType: this.inputContentType.val()});
+			renderizarFoto.call(this, { 
+				nome:  this.inputNomeFoto.val(), 
+				contentType: this.inputContentType.val(), 
+				url: this.inputUrlFoto.val()});
 		}
 	}
 	
 	function onUploadCompleto(resposta) {//Se chegar aqui é uma foto nova. Aqui tem que colocar o /temp, pois em FotoCerveja.html não está o caminho completo para a pasta temp para poder funcionar a edição. Aula 25-2 18:56
 		this.novaFoto.val('true');
+		this.inputUrlFoto.val(resposta.url);//usa essa variavel para armzenar o nome da foto com a url e usa ali em cima no renderizarFoto.call()
 		renderizarFoto.call(this, resposta);
 	}
 	
@@ -44,13 +49,16 @@ Brewer.UploadFoto = (function() {
 		
 		this.uploadDrop.addClass('hidden');
 		
-		var foto = '';//para funcionar inserir foto nova tem que acrescentar caminho 'temp/'. Depois chama ali no foto: foto<-essa é a variavel. Aula 25-2 18:40
+		/*** Tirado na aula 28-5 17:10 e tem comentario em FotoCerveja.html - O que estiver com esse comentario azul foi tirado nessa aula
+		 * var foto = '';//para funcionar inserir foto nova tem que acrescentar caminho 'temp/'. Depois chama ali no foto: foto<-essa é a variavel. Aula 25-2 18:40
 		if (this.novaFoto.val() == 'true') {
 			foto = 'temp/';
 		}
 		foto += resposta.nome;
+		*/
 		
-		var htmlFotoCerveja = this.template({foto: foto});//foto: está em FotoCerveja.html, funciona para quando clicar para editar a foto. Aula 25-2 16:17
+		/*** var htmlFotoCerveja = this.template({foto: foto});*///foto: está em FotoCerveja.html, funciona para quando clicar para editar a foto. Aula 25-2 16:17
+		var htmlFotoCerveja = this.template({url: resposta.url});
 		this.containerFotoCerveja.append(htmlFotoCerveja);
 		
 		$('.js-remove-foto').on('click', onRemoverFoto.bind(this));

@@ -15,6 +15,7 @@ public class CervejaDTO {
 	private String origem;
 	private BigDecimal valor;
 	private String foto;
+	private String urlThumbnailFoto;//colocado na aula 28.05 38:40 pra carregar a foto em CervejasController metodo pesquisar(). Carregar a foto por url
 	
 	public CervejaDTO(Long codigo, String sku, String nome, Origem origem, BigDecimal valor, String foto) {
 		super();
@@ -73,7 +74,14 @@ public class CervejaDTO {
 	public void setFoto(String foto) {
 		this.foto = foto;
 	}
-	
+
+	public String getUrlThumbnailFoto() {
+		return urlThumbnailFoto;
+	}
+
+	public void setUrlThumbnailFoto(String urlThumbnailFoto) {
+		this.urlThumbnailFoto = urlThumbnailFoto;
+	}
 	
 	
 }

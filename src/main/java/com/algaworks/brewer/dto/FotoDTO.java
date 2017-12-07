@@ -4,10 +4,12 @@ public class FotoDTO {
 
 	private String nome;
 	private String contentType;
-
-	public FotoDTO(String nome, String contentType) {
+	private String url;//criado na aula 28-5. Ver FotoStorageRunnable. Criado para passar a url que vai salvar na nuvem, Amazon S3.
+	
+	public FotoDTO(String nome, String contentType, String url) {
 		this.nome = nome;
 		this.contentType = contentType;
+		this.url = url;
 	}
 
 	public String getNome() {
@@ -24,6 +26,14 @@ public class FotoDTO {
 
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 }
