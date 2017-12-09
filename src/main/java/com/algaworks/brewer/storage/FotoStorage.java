@@ -1,5 +1,7 @@
 package com.algaworks.brewer.storage;
 
+import java.util.UUID;
+
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -21,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
  *  Para isso no ServiceConfig Scaneamos ele lá
  *  Também temos que mudar no CadastroVenda.html, onde fazemos a busc da cerveja. Aula 28.05 36:40
  *   - Para isso Temos que configurar TemplateAutocompleteCerveja.html também
+ *   
+ *  renomearArquivo() foi colocado na aula 28.6 03:35, a partir do java 8 é possivel colocar metodo na interface
  */
 public interface FotoStorage { 
 
@@ -41,5 +45,10 @@ public interface FotoStorage {
 	public void excluir(String foto);
 
 	public String getUrl(String foto);
+	
+	default String renomearArquivo(String nomeOriginal) { //agora da pra usar esse metodo nas duas classe concretas ( FotoStorageLocal e FotoStorageS3)
+		return UUID.randomUUID().toString() + "_" + nomeOriginal;
+		
+	}
 	
 }

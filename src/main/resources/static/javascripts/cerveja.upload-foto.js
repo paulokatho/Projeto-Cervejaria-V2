@@ -14,6 +14,7 @@ Brewer.UploadFoto = (function() {
 		this.containerFotoCerveja = $('.js-container-foto-cerveja');
 		
 		this.uploadDrop = $('#upload-drop');		
+		this.imgLoading = $('.js-img-loading');
 	}
 	
 	UploadFoto.prototype.iniciar = function () {
@@ -23,7 +24,8 @@ Brewer.UploadFoto = (function() {
 				allow: '*.(jpg|jpeg|png)',
 				action: this.containerFotoCerveja.data('url-fotos'),
 				complete: onUploadCompleto.bind(this),
-				beforeSend: adicionarCsrfToken //para acrescentar o token csrf na página de cadastro cerveja ao carregar a foto. Ver CadastroCerveja.html
+				beforeSend: adicionarCsrfToken, //para acrescentar o token csrf na página de cadastro cerveja ao carregar a foto. Ver CadastroCerveja.html
+				loadstart: onLoadStart.bind(this)//loadstart é um call back que tem e podemos usar, mas é melhor estudar um pouco melhor depois no google. Aula 28-6 19:10
 		}
 		
 		UIkit.uploadSelect($('#upload-select'), settings);
@@ -37,9 +39,14 @@ Brewer.UploadFoto = (function() {
 		}
 	}
 	
+	function onLoadStart() {
+		this.imgLoading.removeClass('hidden');
+	}
+	
 	function onUploadCompleto(resposta) {//Se chegar aqui é uma foto nova. Aqui tem que colocar o /temp, pois em FotoCerveja.html não está o caminho completo para a pasta temp para poder funcionar a edição. Aula 25-2 18:56
 		this.novaFoto.val('true');
 		this.inputUrlFoto.val(resposta.url);//usa essa variavel para armzenar o nome da foto com a url e usa ali em cima no renderizarFoto.call()
+		this.imgLoading.addClass('hidden');
 		renderizarFoto.call(this, resposta);
 	}
 	
