@@ -30,7 +30,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 
 @Configuration
 //@PropertySource(value = { "file://${HOME}/.brewer-s3.properties" }, ignoreResourceNotFound = true)// no windows não funciona como na aula 24-4 12:54
-@PropertySource(value = { "classpath:brewer-s3.properties" }, ignoreResourceNotFound = true)
+@PropertySource(value = { "classpath:brewer-s3.properties" }, ignoreResourceNotFound = true)//O ignoreResourceNotFound é pq não temos acesso ao arquivo e caminho lá do servidor
 public class S3Config {
 
 	@Autowired
@@ -38,7 +38,7 @@ public class S3Config {
 	
 	@Bean
 	public AmazonS3 amazonS3() {
-		AWSCredentials credentials = new BasicAWSCredentials(
+		AWSCredentials credentials = new BasicAWSCredentials(//Lembrar de configurar nossas imagens lá na Amazon e configurar no heroku(AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY). Aula 28.8 28:07
 				env.getProperty("AWS_ACCESS_KEY_ID"), env.getProperty("AWS_SECRET_ACCESS_KEY"));
 		AmazonS3 amazonS3 = new AmazonS3Client(credentials, new ClientConfiguration());
 		Region regiao = Region.getRegion(Regions.SA_EAST_1); //essa regiao (SA_EAST_1)tem que ser a mesma que aparece na sua conta na amazon no link ex: https://console.aws.amazon.com/iam/home?region=sa-east-1

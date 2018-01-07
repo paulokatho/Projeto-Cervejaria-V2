@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -26,8 +25,10 @@ import com.algaworks.brewer.mail.Mailer;
  */
 @Configuration
 @ComponentScan(basePackageClasses = Mailer.class)//mapeando a classe Mailer, pois Mailer é um @Component
-@PropertySource({ "classpath:env/mail-${ambiente:local}.properties" })
-@PropertySource(value = { "file://${HOME}/.brewer-mail.properties" }, ignoreResourceNotFound = true)// no windows não funciona como na aula 24-2
+//@PropertySource(value = { "classpath:env/mail-${ambiente:local}.properties" }) -- Tirado na aula 28.8 26:13
+@PropertySource(value = { "classpath:env/mail-${ambiente:local}.properties" })
+@PropertySource(value = { "file://${HOME}/.brewer-mail.properties" }, ignoreResourceNotFound = true)
+//acima no windows não funciona como na aula 24-2. O ignoreResourceNotFound é pq não temos acesso ao arquivo e caminho lá do servidor
 
 //@PropertySources({
 //	@PropertySource("classpath:env/mail-${ambiente:local}.properties"),
@@ -45,7 +46,8 @@ public class MailConfig {
 		mailSender.setHost("smtp.sendgrid.net");
 		mailSender.setPort(587);
 		mailSender.setUsername(env.getProperty("username"));//carrega usuario e senha do properties para questão de segurança
-		mailSender.setPassword(env.getProperty("password"));
+		mailSender.setPassword(env.getProperty("SENDGRID_PASSWORD"));//Recurso do heroku, vamos setar o valor lá no heroku, esse é para profile 'prod'. aula 28.8 27:09
+		//mailSender.setPassword(env.getProperty("password"));//Tirado na aula 28.8 26:13
 		
 		System.out.println(">>> Usuario: " + mailSender.getUsername());
 		System.out.println(">>> Password: " + mailSender.getPassword());

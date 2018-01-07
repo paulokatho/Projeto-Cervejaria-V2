@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -111,11 +111,14 @@
 		<!-- AWS SDK - S3 -->
 		<aws-java-sdk-s3.version>1.10.77</aws-java-sdk-s3.version>
 		
+		<!-- Apache Commons DBCP - usado para configração do database de produção no jpaConfig -->
+		<commons-dbcp2.version>2.1.1</commons-dbcp2.version>
+		
 	</properties>
 
 	<build>
 	
-		<finalName>${artifactId}</finalName>
+		<finalName>${project.artifactId}</finalName>
 		
 		<plugins>
 			<plugin>
@@ -137,6 +140,46 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<!-- Vamos configurar o profile para quando for produção (momento de compilação) 
+			usar a conexão Apache Commons DBCP e quando for local usar a nossa JNDI 
+			no JPAConfig tem os data sources com profiles 'prod e local', mas é do spring
+			e é para depois que compilou ele injeta o data source conforme o profile que foi setado-->
+	<profiles>
+		<profile>
+			<id>local</id>
+		</profile>
+		
+		<profile>
+			<id>prod</id>
+			
+				<!-- Aqui quando é para quando for empacotar com o profile de 'prod', precisamos informar qual é 
+					  o active default, pois quando ele for empacotar sem informarmos que é local, ele utiliza esse
+					  empacotamento e assim o nosso driver mysql é empacotado para poder jogar o .war lá no heroku.
+					  Aula 28.8 24:28 -->
+				<activation>
+					<activeByDefault>true</activeByDefault>
+				</activation>
+				
+				<dependencies>
+					<!-- MySQL Driver 
+							O Driver mysql veio pra cá na aula 28.8 19:43 para poder rodar lá no heroku, ou seja, para
+								rodar no servidor precisamos do driver aqui, pois lá no heroku não temos acesso ao tom cat
+								para pegar essa configuração e o <scope> é para empacotar junto com a nossa aplicação  
+					Tem como testar e validar que essa dependencia não foi empacotada no .war da aplicação, para isso 
+					 e necessario instalar o maven e executar alguns comando no bash linux quando for local, se atravez desse
+					 maven você empacotar como 'prod' ele vai empacotar dentro do .war o mysql para ser usado 
+					 la dentro do heroku, Aula 28.8 23:00			
+					-->
+					<dependency>
+						<groupId>mysql</groupId>
+						<artifactId>mysql-connector-java</artifactId>
+						<version>${mysql-connector-java.version}</version>
+						<scope>compile</scope>
+					</dependency>
+				</dependencies>
+		</profile>
+	</profiles>
 
 	<dependencyManagement>
 		<dependencies>
@@ -238,14 +281,6 @@
     		<artifactId>hibernate-java8</artifactId>
     		<version>${hibernate.version}</version>
     		<scope>compile</scope>
-		</dependency>
-		
-		<!-- MySQL Driver -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql-connector-java.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		
 		<!-- Spring Data JPA -->
@@ -353,6 +388,17 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>${aws-java-sdk-s3.version}</version>
+		</dependency>
+		
+		<!-- Apache Commons DBCP - usado para configração do database de produção no jpaConfig 
+			Só vamos utilizar essa dependencia quando estiver em produção 
+			Aula 28-8 18:50 Diz que o dbcp pode ficar aqui quando formos subir a aplicação para o servidor,
+				pois precisamos dela rodando aqui, para quando subirmos a aplicação para o servidor, lá não tem o driver
+				do Mysql, então temos que passar o driver um pouco lá pra cima no pom.xml dentro da tag <profile> -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>${commons-dbcp2.version}</version>
 		</dependency>
 		
 	</dependencies>
